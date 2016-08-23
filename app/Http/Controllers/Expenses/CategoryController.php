@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Expenses;
 
 use App\Http\Requests\Expenses\CategoryStore;
 use App\Models\Expenses\Category;
+use App\Models\Expenses\TransactionTypesEnum;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -11,15 +12,6 @@ use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
-	/**
-	 * @var Request
-	 */
-	protected $request;
-	
-	public function __construct(Request $request)
-	{
-		$this->request = $request;
-	}
 	
     /**
      * Display a listing of the resource.
@@ -28,8 +20,15 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categoryCollection = Category::all();
-		return view('pages.expenses.category.index', compact('categoryCollection'));
+        $categoryCollection = Category::byUserId($this->user->id)->orderBy('budget', 'DESC')->get();
+		$incomeCategoryCollection = $categoryCollection->where('type', TransactionTypesEnum::INCOME);
+		$expenseCategoryCollection = $categoryCollection->where('type', TransactionTypesEnum::EXPENSE);
+		$totalBudget = $incomeCategoryCollection->sum('budget') - $expenseCategoryCollection->sum('budget');
+		return view('pages.expenses.category.index', compact(
+			'categoryCollection',
+			'expenseCategoryCollection',
+			'incomeCategoryCollection',
+			'totalBudget'));
     }
 
     /**
@@ -52,19 +51,7 @@ class CategoryController extends Controller
     {
 		$category = Category::create(['user_id' => $this->request->user()->id] + $request->all());
 		flash()->success("Success!", "Your new category is added.");
-		return redirect()->to('/expenses/category/' . $category->id);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $category = Category::find($id);
-		return view('pages.expenses.category.show', compact('category'));
+		return redirect()->to('/expenses/category');
     }
 
     /**
@@ -75,19 +62,24 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        //
+		$category = Category::find($id);
+		return view('pages.expenses.category.create', compact('category'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+	
+	/**
+	 * Update the specified resource in storage.
+	 *
+	 * @param CategoryStore|Request $request
+	 * @param  int $id
+	 * @return \Illuminate\Http\Response
+	 */
+    public function update(CategoryStore $request, $id)
     {
-        //
+    	$category = Category::find($id);
+		$category->fill($request->only('name', 'budget'));
+		$category->save();
+		flash()->success("Success!", "Your category is modified.");
+		return redirect()->to('/expenses/category');
     }
 
     /**
@@ -98,6 +90,8 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $category = Category::find($id);
+		if($category) $category->delete();
+		return redirect()->back();
     }
 }

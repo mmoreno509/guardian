@@ -4,12 +4,14 @@ namespace App\Models\Expenses;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 
 /**
  * Class Transaction
  * @package App\Models\Expenses
+ * @property int id
  * @property int user_id
  * @property string type
  * @property string type_name
@@ -22,13 +24,29 @@ use Carbon\Carbon;
  *
  * @property Category category
  * @property User user
+ * @property Collection accounts
  */
 class Transaction extends Model
 {
 	protected $table = 'expenses_transactions';
-	protected $fillable = [ 'user_id', 'type', 'category_id', 'description', 'amount', 'at' ];
+	protected $fillable = [
+		'user_id',
+		'type',
+		'category_id',
+		'description',
+		'amount',
+		'at'
+	];
 	protected $dates = ['at', 'created_at', 'updated_at'];
 	protected $appends = ['type_name', 'amount_formatted'];
+	
+	/**
+	 * @return Account|null
+	 */
+	public function getFirstAccount()
+	{
+		return (count($this->accounts) > 0) ? $this->accounts->first() : null;
+	}
 	
 	//
 	// RELATIONS
@@ -40,6 +58,14 @@ class Transaction extends Model
 	public function category()
 	{
 		return $this->belongsTo(Category::class, 'category_id');
+	}
+	
+	/**
+	 * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+	 */
+	public function accounts()
+	{
+		return $this->belongsToMany(Account::class, 'expenses_account_transactions', 'transaction_id', 'account_id');
 	}
 	
 	/**
@@ -65,7 +91,7 @@ class Transaction extends Model
 		if($this->type == TransactionTypesEnum::EXPENSE) $multiplier = -1;
 		if($this->type == TransactionTypesEnum::TRANSFER) $multiplier = 0;
 		$amount = array_get($this->attributes, 'amount', 0) * $multiplier;
-		return '$ ' . money_format('%.2n', $amount);
+		return formatToMoney($amount);
 	}
 	
 	//

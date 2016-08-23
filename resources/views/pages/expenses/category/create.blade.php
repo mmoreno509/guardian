@@ -3,14 +3,14 @@
 
 @section('expenses_path')
     <li><a href="/expenses/category">Categories</a></li>
-    <li class="active">New Category</li>
+    <li class="active">{{ empty($category) ? "New Category" : $category->name }}</li>
 @append
 
-@section('expenses_title', "New Category")
+@section('expenses_title', empty($category) ? "New Category" : "Edit Category: " . $category->name)
 
 @section('expenses_content')
 
-    <form method="POST" action="/expenses/category">
+    <form method="POST" action="/expenses/category/{{ empty($category) ?: $category->id }}">
 
         @if(count($errors))
             <div class="alert alert-danger">

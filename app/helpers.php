@@ -16,3 +16,8 @@ function url_match($link, $url = null)
 		$url = substr($url, 0, $queryStart);
 	return ends_with($url, $link);
 }
+
+function formatToMoney($value)
+{
+	return '$ ' . money_format('%.2n', $value);
+}

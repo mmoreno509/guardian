@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Expenses;
 
-use App\Http\Requests\Expenses\IncomeTransactionStore;
+use App\Http\Requests\Expenses\ExpenseTransactionStore;
 use App\Models\Expenses\Account;
 use App\Models\Expenses\Category;
 use App\Models\Expenses\Transaction;
@@ -10,23 +10,24 @@ use App\Models\Expenses\TransactionTypesEnum;
 use App\Repositories\Expenses\TransactionsRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
-class IncomeTransactionController extends Controller
+class ExpenseTransactionController extends Controller
 {
-	/**
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-    	$at = new Carbon($this->request->get('at'));
-    	$transactionCollection = Transaction::with('category')
-			->byType(TransactionTypesEnum::INCOME)
+		$at = new Carbon($this->request->get('at'));
+		$transactionCollection = Transaction::with('category')
+			->byType(TransactionTypesEnum::EXPENSE)
 			->byMonth($at)
 			->get();
-        return view('pages.expenses.transaction.income.index', compact('transactionCollection'));
+		return view('pages.expenses.transaction.expense.index', compact('transactionCollection', 'at'));
     }
 
     /**
@@ -36,35 +37,34 @@ class IncomeTransactionController extends Controller
      */
     public function create()
     {
-    	$categoryList = Category::byType(TransactionTypesEnum::INCOME)
+		$categoryList = Category::byType(TransactionTypesEnum::EXPENSE)
 			->orderBy('name')
 			->get()
 			->lists('name', 'id');
 		$accountList = Account::orderBy('name')
 			->get()
 			->lists('name', 'id');
-		$category = new Category();
-    	
-        return view('pages.expenses.transaction.income.create', compact('categoryList', 'accountList', 'category'));
+	
+		return view('pages.expenses.transaction.expense.create', compact('categoryList', 'accountList'));
     }
 	
 	/**
 	 * Store a newly created resource in storage.
 	 *
-	 * @param IncomeTransactionStore|Request $request
+	 * @param ExpenseTransactionStore|Request $request
 	 * @param TransactionsRepository $transactionsRepository
 	 * @return \Illuminate\Http\Response
 	 */
-    public function store(IncomeTransactionStore $request, TransactionsRepository $transactionsRepository)
+    public function store(ExpenseTransactionStore $request, TransactionsRepository $transactionsRepository)
     {
-        $transactionsRepository->createIncome(
-        	$this->user,
+		$transactionsRepository->createExpense(
+			$this->user,
 			new Carbon($request->get('at')),
 			Category::find($request->get('category_id')),
 			Account::find($request->get('account_id')),
 			$request->get('description'),
 			$request->get('amount'));
-		
+	
 		return redirect()->refresh();
     }
 

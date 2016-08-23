@@ -9,8 +9,9 @@ Route::group(['middleware' => 'auth'], function(){
 	Route::group(['prefix' => 'expenses', 'namespace' => 'Expenses'], function(){
 		Route::get('/', 'HomeController@index');
 		Route::resource('account', 'AccountController');
-		Route::resource('category', 'CategoryController');
+		Route::resource('category', 'CategoryController', [ 'except' => ['show'] ]);
 		Route::resource('transactions/income', 'IncomeTransactionController');
+		Route::resource('transactions/expense', 'ExpenseTransactionController');
 	});
 	
 });

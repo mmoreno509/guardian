@@ -1,13 +1,13 @@
 @extends('pages.expenses.layout')
 
 @section('expenses_path')
-    <li class="active">Incomes</li>
+    <li class="active">Income Transactions</li>
 @stop
 
-@section('expenses_title', "Transactions")
+@section('expenses_title', "Income Transactions")
 
 @section('expenses_menu')
-    <a href="/expenses/transaction/create" class="btn btn-success">Create Transaction</a>
+    <a href="/expenses/transactions/income/create" class="btn btn-success">Create Transaction</a>
 @endsection
 
 @section('expenses_content')
@@ -28,7 +28,13 @@
                 <td>{{ $transaction->at->format('M j') }}</td>
                 <td>{{ ($transaction->category) ? $transaction->category->name : '' }}</td>
                 <td>{{ $transaction->description }}</td>
-                <td></td>
+                <td>
+                    @if($transaction->getFirstAccount())
+                        {{ $transaction->getFirstAccount()->name }}
+                    @else
+                        <span class="text-muted">none</span>
+                    @endif
+                </td>
                 <td>{{ $transaction->amount_formatted }}</td>
             </tr>
         @endforeach
