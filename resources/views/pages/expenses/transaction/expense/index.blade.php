@@ -7,13 +7,34 @@
 @section('expenses_title', "Expense Transactions")
 
 @section('expenses_menu')
-    <form action="" method="GET" class="form-inline">
-        <input type="text" name="at" value="{{ $at->format('') }}" placeholder="Select Month" class="form-control month-picker">
-        <a href="/expenses/transactions/expense/create" class="btn btn-success">Create</a>
-    </form>
+    <a href="/expenses/transactions/expense/create" class="btn btn-success">Create</a>
 @endsection
 
 @section('expenses_content')
+
+    <form action="" method="GET">
+        <div class="row">
+            <!-- Search -->
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search for...">
+                    <span class="input-group-btn">
+                        <button typeof="submit" class="btn btn-primary" type="button">Search</button>
+                    </span>
+                </div>
+            </div>
+            <!-- Month -->
+            <div class="col-md-4 col-md-offset-2">
+                <div class="input-group">
+                    <span class="input-group-addon" id="month_label">Month</span>
+                    <input type="text" name="at" value="{{ $at->format('F Y') }}" class="form-control month-picker" placeholder="Select Month" aria-describedby="month_label">
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+    <hr/>
 
     <table class="table table-striped">
         <thead>
@@ -50,6 +71,7 @@
     <script>
         $(function(){
             $('.month-picker').datepicker({
+                format: 'MM yyyy',
                 minViewMode: 1,
                 maxViewMode: 2,
                 autoclose: true,
@@ -61,4 +83,4 @@
             });
         });
     </script>
-@stop
+@append

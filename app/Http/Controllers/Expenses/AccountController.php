@@ -55,18 +55,6 @@ class AccountController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $account = Account::find($id);
-		return view('pages.expenses.account.show', compact('account'));
-    }
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
