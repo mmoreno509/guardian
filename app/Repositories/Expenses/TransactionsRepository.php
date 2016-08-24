@@ -10,6 +10,25 @@ use Carbon\Carbon;
 
 class TransactionsRepository
 {
+	public function getTransactions(User $user, $types, Carbon $month, $search = null)
+	{
+		return Transaction::with('category')
+			->byUserId($user->id)
+			->byType($types)
+			->searchBy($search)
+			->byMonth($month)
+			->get();
+	}
+	
+	public function deleteTransaction(User $user, $id)
+	{
+		$transaction = Transaction::byUserId($user->id)->where('id', $id)->first();
+		if($transaction){
+			$transaction->delete();
+		}
+		return $transaction;
+	}
+	
 	protected function createTransaction(User $user, Carbon $at, $type, Category $category, $description, $amount)
 	{
 		$transaction = Transaction::create([

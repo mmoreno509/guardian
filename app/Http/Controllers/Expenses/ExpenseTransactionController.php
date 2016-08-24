@@ -15,7 +15,15 @@ use App\Http\Controllers\Controller;
 
 class ExpenseTransactionController extends Controller
 {
-    /**
+	protected $transactionsRepository;
+	
+	public function __construct(Request $request, TransactionsRepository $transactionsRepository)
+	{
+		parent::__construct($request);
+		$this->transactionsRepository = $transactionsRepository;
+	}
+	
+	/**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -23,10 +31,7 @@ class ExpenseTransactionController extends Controller
     public function index()
     {
 		$at = new Carbon($this->request->get('at'));
-		$transactionCollection = Transaction::with('category')
-			->byType(TransactionTypesEnum::EXPENSE)
-			->byMonth($at)
-			->get();
+		$transactionCollection = $this->transactionsRepository->getTransactions($this->user, TransactionTypesEnum::EXPENSE, $at, $this->request->get('search'));
 		return view('pages.expenses.transaction.expense.index', compact('transactionCollection', 'at'));
     }
 
@@ -110,6 +115,7 @@ class ExpenseTransactionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $this->transactionsRepository->deleteTransaction($this->user, $id);
+		return redirect()->back();
     }
 }

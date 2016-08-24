@@ -17,9 +17,9 @@
             <!-- Search -->
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for...">
+                    <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="Search for...">
                     <span class="input-group-btn">
-                        <button typeof="submit" class="btn btn-primary" type="button">Search</button>
+                        <button type="submit" class="btn btn-primary" type="button">Search</button>
                     </span>
                 </div>
             </div>
@@ -43,7 +43,8 @@
                 <th>Category</th>
                 <th>Description</th>
                 <th>Account</th>
-                <th>Amount</th>
+                <th class="text-right" width="150px">Amount</th>
+                <th class="text-right" width="150px">Options</th>
             </tr>
         </thead>
         <tbody>
@@ -59,11 +60,19 @@
                         <span class="text-muted">none</span>
                     @endif
                 </td>
-                <td>{{ $transaction->amount_formatted }}</td>
+                <td class="text-right">{{ $transaction->amount_formatted }}</td>
+                <td class="text-right">
+                    <button type="button" class="btn btn-xs btn-danger delete_btn" data-id="{{ $transaction->id }}">delete</button>
+                </td>
             </tr>
         @endforeach
         </tbody>
     </table>
+
+    <form id="delete_form" action="/expenses/transactions/expense/[id]" method="POST">
+        {{ csrf_field() }}
+        <input type="hidden" name="_method" value="DELETE">
+    </form>
 
 @stop
 
@@ -81,6 +90,24 @@
             $('.month-picker').change(function(){
                 $(this).closest('form').submit();
             });
+
+            $('.delete_btn').click(function(){
+                var id = $(this).data('id');
+                var action = $('#delete_form').attr('action');
+                action = action.replace('[id]', id);
+                $('#delete_form').attr('action', action);
+                swal({
+                    title: "Are you sure?",
+                    text: "You will not lose any transaction associated to this category",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!",
+                    closeOnConfirm: false }, function(){
+                    $('#delete_form').submit();
+                });
+            });
+
         });
     </script>
 @append

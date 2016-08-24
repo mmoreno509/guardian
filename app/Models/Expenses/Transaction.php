@@ -100,6 +100,16 @@ class Transaction extends Model
 	
 	/**
 	 * @param Builder $query
+	 * @param $userId
+	 * @return Builder
+	 */
+	public function scopeByUserId($query, $userId)
+	{
+		return $query->where('expenses_transactions.user_id', $userId);
+	}
+	
+	/**
+	 * @param Builder $query
 	 * @param $type
 	 * @return Builder
 	 */
@@ -130,5 +140,14 @@ class Transaction extends Model
 	public function scopeDefaultOrder($query)
 	{
 		return $query->orderBy('at', 'DESC');
+	}
+	
+	/**
+	 * @param Builder $query
+	 * @return Builder
+	 */
+	public function scopeSearchBy($query, $search)
+	{
+		return $query->where('description', 'LIKE', '%'.trim($search).'%');
 	}
 }
